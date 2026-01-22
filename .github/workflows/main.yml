@@ -70,6 +70,13 @@ jobs:
             --report-path /repo/artifacts/2ms.sarif \
             --ignore-on-exit results
 
+      - name: Normalize 2MS SARIF paths for GitHub
+        run: |
+         jq '
+         (.runs[].results[].locations[]?.physicalLocation.artifactLocation.uri) |=
+         ( sub("^git show [^:]+:"; "") )
+         ' artifacts/2ms.sarif > artifacts/2ms.fixed.sarif 
+
       - name: Upload 2MS results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
