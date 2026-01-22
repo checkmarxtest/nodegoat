@@ -1,0 +1,76 @@
+name: Security Scans (KICS + Vorpal + 2MS)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      ############################################
+      # Checkout
+      ############################################
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare artifacts directory
+        run: mkdir -p artifacts kics-results
+
+      ############################################
+      # 1. KICS – IaC Scanning
+      ############################################
+      - name: Run KICS
+        uses: checkmarx/kics-github-action@v1.7.0
+        with:
+          path: .
+          output_path: kics-results
+          output_formats: sarif
+          fail_on: high,medium
+        continue-on-error: true
+
+      - name: Upload KICS results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: kics-results/results.sarif
+          category: kics
+
+      ############################################
+      # 2. Vorpal – Secure Coding Best Practices
+      ############################################
+      - name: Run Vorpal (reviewdog)
+        uses: Checkmarx/vorpal-reviewdog-github-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+        continue-on-error: true
+
+      ############################################
+      # 3. 2MS – Secret Detection
+      ############################################
+      - name: Run 2MS Secret Scan
+        run: |
+          docker run --rm \
+            -v "$PWD":/repo \
+            checkmarx/2ms \
+            git /repo \
+            --stdout-format sarif \
+            --report-path /repo/artifacts/2ms.sarif \
+            --ignore-on-exit results
+
+      - name: Upload 2MS results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: artifacts/2ms.sarif
+          category: 2ms-secrets
