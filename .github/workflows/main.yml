@@ -51,6 +51,7 @@ jobs:
       - name: Run Vorpal (reviewdog)
         uses: Checkmarx/vorpal-reviewdog-github-action@v1.2.0
         with:
+          source_path: .
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
