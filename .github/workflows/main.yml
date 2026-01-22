@@ -31,12 +31,11 @@ jobs:
       # 1. KICS – IaC Scanning
       ############################################
       - name: Run KICS
-        uses: checkmarx/kics-github-action@v1.7.0
+        uses: checkmarx/kics-github-action@v2.1.19
         with:
           path: .
           output_path: kics-results
           output_formats: sarif
-          fail_on: high,medium
         continue-on-error: true
 
       - name: Upload KICS results to GitHub Security
@@ -62,6 +61,7 @@ jobs:
       - name: Run 2MS Secret Scan
         run: |
           docker run --rm \
+            --user "$(id -u):$(id -g)" \
             -v "$PWD":/repo \
             checkmarx/2ms \
             git /repo \
