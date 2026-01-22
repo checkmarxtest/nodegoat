@@ -36,6 +36,7 @@ jobs:
           path: .
           output_path: kics-results
           output_formats: sarif
+          ignore_on_exit: results
         continue-on-error: true
 
       - name: Upload KICS results to GitHub Security
