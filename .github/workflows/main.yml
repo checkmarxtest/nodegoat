@@ -49,7 +49,7 @@ jobs:
       # 2. Vorpal – Secure Coding Best Practices
       ############################################
       - name: Run Vorpal (reviewdog)
-        uses: Checkmarx/vorpal-reviewdog-github-action@v1
+        uses: Checkmarx/vorpal-reviewdog-github-action@v1.2.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
