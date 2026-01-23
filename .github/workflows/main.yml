@@ -48,9 +48,16 @@ jobs:
       ############################################
       # 2. Vorpal – Secure Coding Best Practices
       ############################################
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32 #v46.0.1
+        with:
+          separator: ','
+      
       - name: Run Vorpal (reviewdog)
         uses: Checkmarx/vorpal-reviewdog-github-action@v1.2.0
         with:
+          source_path: "${{steps.changed-files.outputs.all_changed_files}}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           level: warning
